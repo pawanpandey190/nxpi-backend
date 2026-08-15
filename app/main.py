@@ -72,6 +72,8 @@ async def seed_constant_admin_account() -> None:
                 logger.info(f"Admin account credentials and privileges enforced for {settings.ADMIN_EMAIL}")
     except Exception as exc:
         logger.error(f"Failed to seed admin account: {exc}")
+
+
 async def seed_country_rules() -> None:
     """Auto-seed default 28 country document rules if empty."""
     try:
@@ -236,9 +238,13 @@ async def generic_exception_handler(request: Request, exc: Exception):
     )
 
 
-uploads_dir = Path(__file__).parent / "uploads"
-uploads_dir.mkdir(parents=True, exist_ok=True)
-app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
+# Mount uploads directory safely (if directory exists or can be created)
+try:
+    uploads_dir = Path(__file__).parent / "uploads"
+    uploads_dir.mkdir(parents=True, exist_ok=True)
+    app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
+except Exception as exc:
+        logger.warning(f"Could not mount static uploads directory: {exc}")
 
 from app.api.v1.router import api_router
 

@@ -19,7 +19,11 @@ RUN pip install --upgrade pip && \
 
 COPY . .
 
-RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
+RUN addgroup --system appgroup && \
+    adduser --system --ingroup appgroup appuser && \
+    mkdir -p /app/app/uploads /app/uploads && \
+    chown -R appuser:appgroup /app
+
 USER appuser
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
