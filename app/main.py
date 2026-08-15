@@ -156,16 +156,9 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "https://negentrophi.com",
-    "https://www.negentrophi.com",
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=_ALLOWED_ORIGINS,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -244,7 +237,7 @@ try:
     uploads_dir.mkdir(parents=True, exist_ok=True)
     app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
 except Exception as exc:
-        logger.warning(f"Could not mount static uploads directory: {exc}")
+    logger.warning(f"Could not mount static uploads directory: {exc}")
 
 from app.api.v1.router import api_router
 
