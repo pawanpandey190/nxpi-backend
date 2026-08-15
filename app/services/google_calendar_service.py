@@ -8,9 +8,6 @@ Also creates a Google Calendar event so the admin can track the schedule.
 import logging
 from datetime import datetime, timedelta, timezone
 
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
-
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -25,20 +22,31 @@ def _get_meet_link() -> str:
 
 def _get_service_account_calendar_service():
     """Build Calendar API service using the service account (for creating calendar events)."""
+    try:
+        from google.oauth2 import service_account
+        from googleapiclient.discovery import build
+    except ImportError as err:
+        logger.warning(f"Google API client libraries not available: {err}")
+        return None
+
     client_email = settings.GOOGLE_CALENDAR_CLIENT_EMAIL
     private_key = settings.GOOGLE_CALENDAR_PRIVATE_KEY
     if not client_email or not private_key:
         return None
-    formatted_key = private_key.replace("\\n", "\n")
-    credentials_info = {
-        "type": "service_account",
-        "client_email": client_email,
-        "private_key": formatted_key,
-        "token_uri": "https://oauth2.googleapis.com/token",
-    }
-    scopes = ["https://www.googleapis.com/auth/calendar"]
-    creds = service_account.Credentials.from_service_account_info(credentials_info, scopes=scopes)
-    return build("calendar", "v3", credentials=creds)
+    try:
+        formatted_key = private_key.replace("\\n", "\n")
+        credentials_info = {
+            "type": "service_account",
+            "client_email": client_email,
+            "private_key": formatted_key,
+            "token_uri": "https://oauth2.googleapis.com/token",
+        }
+        scopes = ["https://www.googleapis.com/auth/calendar"]
+        creds = service_account.Credentials.from_service_account_info(credentials_info, scopes=scopes)
+        return build("calendar", "v3", credentials=creds)
+    except Exception as exc:
+        logger.warning(f"Failed to initialize Google Calendar credentials: {exc}")
+        return None
 
 
 async def create_google_meet_event(

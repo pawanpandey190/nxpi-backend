@@ -22,6 +22,10 @@ httpx==0.28.1
 resend==2.6.0
 jinja2==3.1.4
 
+# ─── Google Services ─────────────────────────────────────────────────────────
+google-api-python-client>=2.150.0
+google-auth>=2.36.0
+
 # ─── Observability & Utils ───────────────────────────────────────────────────
 sentry-sdk[fastapi]==2.19.2
 python-dotenv==1.0.1
